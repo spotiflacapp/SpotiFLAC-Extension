@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-11T10:44:13Z",
+  "updated_at": "2026-03-11T19:01:40Z",
   "extensions": [
     {
       "id": "spotify-web",
@@ -18,7 +18,7 @@
       "min_app_version": "3.2.0"
     },
     {
-      "id": "amzn",
+      "id": "amazon",
       "name": "amazon",
       "display_name": "Amazon",
       "version": "1.0.0",
@@ -28,7 +28,7 @@
       "category": "download",
       "tags": ["amazon", "download", "lossless"],
       "downloads": 0,
-      "updated_at": "2026-03-11T10:44:13Z",
+      "updated_at": "2026-03-11T19:01:40Z",
       "min_app_version": "3.7.2"
     },
     {
