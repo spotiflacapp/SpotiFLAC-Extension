@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-26T18:00:00Z",
+  "updated_at": "2026-03-27T15:01:02Z",
   "extensions": [
     {
       "id": "spotify-web",
@@ -34,7 +34,7 @@
       "id": "ytmusic-spotiflac",
       "name": "ytmusic-spotiflac",
       "display_name": "YouTube Music",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": "Amonoman and Zarz",
       "description": "YouTube Music metadata & download provider for SpotiFLAC. Search tracks, albums, playlists on YouTube Music.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/ytmusic-spotiflac.spotiflac-ext",
@@ -42,7 +42,7 @@
       "category": "download",
       "tags": ["youtube", "ytmusic", "metadata", "search", "homefeed", "download"],
       "downloads": 0,
-      "updated_at": "2026-03-26T16:00:00Z",
+      "updated_at": "2026-03-27T15:01:02Z",
       "min_app_version": "4.1.0"
     }
   ]
