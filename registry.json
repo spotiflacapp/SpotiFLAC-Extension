@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-03-27T18:11:14Z",
+  "updated_at": "2026-04-04T08:41:28Z",
   "extensions": [
     {
       "id": "spotify-web",
@@ -20,15 +20,43 @@
       "id": "amazon",
       "name": "amazon",
       "display_name": "Amazon Music",
-      "version": "2.0.8",
+      "version": "2.0.9",
       "author": "afkarxyz",
       "description": "Amazon Music metadata & download provider for SpotiFLAC. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless audio via third-party APIs.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/amzn.spotiflac-ext",
       "category": "download",
       "tags": ["amazon", "download", "lossless", "metadata", "search"],
       "downloads": 0,
-      "updated_at": "2026-03-27T18:11:14Z",
+      "updated_at": "2026-04-04T08:41:28Z",
       "min_app_version": "4.1.0"
+    },
+    {
+      "id": "apple-music",
+      "name": "apple-music",
+      "display_name": "Apple Music",
+      "version": "1.1.0",
+      "author": "zarzet",
+      "description": "Apple Music metadata and lyrics provider. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription). Supports word-by-word sync, translation, and pronunciation.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/apple-musc.spotiflac-ext",
+      "category": "integration",
+      "tags": ["apple", "metadata", "lyrics", "search"],
+      "downloads": 0,
+      "updated_at": "2026-04-04T08:41:28Z",
+      "min_app_version": "4.2.0"
+    },
+    {
+      "id": "soundcloud",
+      "name": "soundcloud",
+      "display_name": "SoundCloud",
+      "version": "1.0.0",
+      "author": "zarzet",
+      "description": "SoundCloud metadata and download provider. Search tracks, albums, playlists, artists. Downloads via direct SoundCloud streams with Cobalt API fallback.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/soundcloud.spotiflac-ext",
+      "category": "download",
+      "tags": ["soundcloud", "download", "metadata", "search"],
+      "downloads": 0,
+      "updated_at": "2026-04-04T08:41:28Z",
+      "min_app_version": "4.2.0"
     },
     {
       "id": "ytmusic-spotiflac",

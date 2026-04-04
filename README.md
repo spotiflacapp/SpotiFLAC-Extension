@@ -11,7 +11,7 @@
 
 ## Requirements
 
-- Extension must follow [Extension Development Guide](https://zarz.moe/docs)
+- Extension must follow [Extension Development Guide](https://spotiflac.zarz.moe/docs)
 - No malicious code
 - Clear description of what extension does
 - Working download URL and icon URL
