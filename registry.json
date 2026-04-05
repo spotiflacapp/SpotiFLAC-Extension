@@ -1,19 +1,24 @@
 {
   "version": 1,
-  "updated_at": "2026-04-04T08:41:28Z",
+  "updated_at": "2026-04-05T21:29:00Z",
   "extensions": [
     {
       "id": "spotify-web",
       "name": "spotify-web",
       "display_name": "Spotify Web",
-      "version": "1.9.9",
+      "version": "1.9.10",
       "author": "afkarxyz",
       "description": "Fetch Spotify metadata via web API. Supports personalized playlists like Daily Mix, Discover Weekly, and more. Includes Home Feed explore and metadata enrichment via Spotify native ISRC plus Deezer.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/spotify-web.spotiflac-ext",
       "category": "integration",
-      "tags": ["spotify", "web", "streaming", "homefeed"],
+      "tags": [
+        "spotify",
+        "web",
+        "streaming",
+        "homefeed"
+      ],
       "downloads": 0,
-      "updated_at": "2026-03-26T18:00:00Z",
+      "updated_at": "2026-04-05T21:29:00Z",
       "min_app_version": "4.1.0"
     },
     {
@@ -25,7 +30,13 @@
       "description": "Amazon Music metadata & download provider for SpotiFLAC. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless audio via third-party APIs.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/amzn.spotiflac-ext",
       "category": "download",
-      "tags": ["amazon", "download", "lossless", "metadata", "search"],
+      "tags": [
+        "amazon",
+        "download",
+        "lossless",
+        "metadata",
+        "search"
+      ],
       "downloads": 0,
       "updated_at": "2026-04-04T08:41:28Z",
       "min_app_version": "4.1.0"
@@ -34,14 +45,19 @@
       "id": "apple-music",
       "name": "apple-music",
       "display_name": "Apple Music",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": "zarzet",
       "description": "Apple Music metadata and lyrics provider. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription). Supports word-by-word sync, translation, and pronunciation.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/apple-musc.spotiflac-ext",
       "category": "integration",
-      "tags": ["apple", "metadata", "lyrics", "search"],
+      "tags": [
+        "apple",
+        "metadata",
+        "lyrics",
+        "search"
+      ],
       "downloads": 0,
-      "updated_at": "2026-04-04T08:41:28Z",
+      "updated_at": "2026-04-05T21:29:00Z",
       "min_app_version": "4.2.0"
     },
     {
@@ -53,7 +69,12 @@
       "description": "SoundCloud metadata and download provider. Search tracks, albums, playlists, artists. Downloads via direct SoundCloud streams with Cobalt API fallback.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/soundcloud.spotiflac-ext",
       "category": "download",
-      "tags": ["soundcloud", "download", "metadata", "search"],
+      "tags": [
+        "soundcloud",
+        "download",
+        "metadata",
+        "search"
+      ],
       "downloads": 0,
       "updated_at": "2026-04-04T08:41:28Z",
       "min_app_version": "4.2.0"
@@ -68,7 +89,14 @@
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/ytmusic-spotiflac.spotiflac-ext",
       "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/ytmusic-spotiflac.jpg",
       "category": "download",
-      "tags": ["youtube", "ytmusic", "metadata", "search", "homefeed", "download"],
+      "tags": [
+        "youtube",
+        "ytmusic",
+        "metadata",
+        "search",
+        "homefeed",
+        "download"
+      ],
       "downloads": 0,
       "updated_at": "2026-03-27T15:01:02Z",
       "min_app_version": "4.1.0"
