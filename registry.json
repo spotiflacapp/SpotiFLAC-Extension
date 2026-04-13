@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-04-13T16:17:51Z",
+  "updated_at": "2026-04-13T16:25:00Z",
   "extensions": [
     {
       "id": "spotify-web",
@@ -43,7 +43,7 @@
       "id": "apple-music",
       "name": "apple-music",
       "display_name": "Apple Music",
-      "version": "1.2.3",
+      "version": "1.2.4",
       "description": "Apple Music metadata, lyrics, and download provider for SpotiFLAC Mobile. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription). Downloads use the Apple queue API first with app2 direct-stream fallback.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/apple-musc.spotiflac-ext",
       "category": "integration",
@@ -55,7 +55,7 @@
         "download"
       ],
       "downloads": 0,
-      "updated_at": "2026-04-13T00:00:00Z",
+      "updated_at": "2026-04-13T16:25:00Z",
       "min_app_version": "4.3.0"
     },
     {
