@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-04-20T00:00:00Z",
+  "updated_at": "2026-05-06T00:00:00Z",
   "extensions": [
     {
       "id": "spotify-web",
@@ -24,8 +24,8 @@
       "id": "amazon",
       "name": "amazon",
       "display_name": "Amazon Music",
-      "version": "2.0.11",
-      "description": "Amazon Music metadata & download provider for SpotiFLAC. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless audio via third-party APIs.",
+      "version": "2.1.1",
+      "description": "Amazon Music metadata & download provider for SpotiFLAC. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless and Dolby Atmos audio.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/amzn.spotiflac-ext",
       "category": "download",
       "tags": [
@@ -36,15 +36,15 @@
         "search"
       ],
       "downloads": 0,
-      "updated_at": "2026-04-13T00:00:00Z",
+      "updated_at": "2026-05-03T10:17:57Z",
       "min_app_version": "4.3.0"
     },
     {
       "id": "apple-music",
       "name": "apple-music",
       "display_name": "Apple Music",
-      "version": "1.2.4",
-      "description": "Apple Music metadata, lyrics, and download provider for SpotiFLAC Mobile. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription). Downloads use the Apple queue API first with app2 direct-stream fallback.",
+      "version": "1.2.5",
+      "description": "Apple Music metadata, lyrics, and download provider for SpotiFLAC Mobile. Fetches ISRC, label, copyright, genre, composer. Lyrics require a Media User Token (Apple Music subscription). Downloads use the Apple app2 direct-stream API first with queued app fallback.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/apple-musc.spotiflac-ext",
       "category": "integration",
       "tags": [
@@ -55,14 +55,14 @@
         "download"
       ],
       "downloads": 0,
-      "updated_at": "2026-04-13T16:25:00Z",
+      "updated_at": "2026-05-03T10:17:57Z",
       "min_app_version": "4.3.0"
     },
     {
       "id": "soundcloud",
       "name": "soundcloud",
       "display_name": "SoundCloud",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "SoundCloud metadata and download provider. Search tracks, albums, playlists, artists. Downloads via direct SoundCloud streams with Cobalt API fallback.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/soundcloud.spotiflac-ext",
       "category": "download",
@@ -73,15 +73,15 @@
         "search"
       ],
       "downloads": 0,
-      "updated_at": "2026-04-13T00:00:00Z",
+      "updated_at": "2026-04-16T00:00:00Z",
       "min_app_version": "4.3.0"
     },
     {
       "id": "ytmusic-spotiflac",
       "name": "ytmusic-spotiflac",
       "display_name": "YouTube Music",
-      "version": "2.0.4",
-      "description": "YouTube Music metadata & download provider for SpotiFLAC. Search tracks, albums, playlists on YouTube Music.",
+      "version": "2.3.6",
+      "description": "YouTube Music metadata & download provider for SpotiFLAC Mobile. Search tracks, albums, playlists on YouTube Music.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/ytmusic-spotiflac.spotiflac-ext",
       "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/ytmusic-spotiflac.jpg",
       "category": "download",
@@ -94,7 +94,7 @@
         "download"
       ],
       "downloads": 0,
-      "updated_at": "2026-04-13T16:17:51Z",
+      "updated_at": "2026-05-06T00:00:00Z",
       "min_app_version": "4.3.0"
     },
     {
@@ -113,7 +113,7 @@
         "search"
       ],
       "downloads": 0,
-      "updated_at": "2026-04-20T00:00:00Z",
+      "updated_at": "2026-05-03T10:17:57Z",
       "min_app_version": "4.3.0"
     },
     {
@@ -131,8 +131,46 @@
         "search"
       ],
       "downloads": 0,
-      "updated_at": "2026-04-14T12:53:11Z",
+      "updated_at": "2026-05-03T10:17:57Z",
       "min_app_version": "4.2.3"
+    },
+    {
+      "id": "qobuz-web",
+      "name": "qobuz-web",
+      "display_name": "Qobuz",
+      "version": "1.0.3",
+      "description": "Qobuz metadata and download provider for SpotiFLAC Mobile.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/qobuz-web.spotiflac-ext",
+      "category": "download",
+      "tags": [
+        "qobuz",
+        "download",
+        "lossless",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-05-04T06:35:06Z",
+      "min_app_version": "4.5.0"
+    },
+    {
+      "id": "tidal-web",
+      "name": "tidal-web",
+      "display_name": "Tidal",
+      "version": "1.0.1",
+      "description": "TIDAL metadata and search provider for SpotiFLAC Mobile using TIDAL public web endpoints.",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/tidal-web.spotiflac-ext",
+      "category": "download",
+      "tags": [
+        "tidal",
+        "download",
+        "lossless",
+        "metadata",
+        "search"
+      ],
+      "downloads": 0,
+      "updated_at": "2026-05-06T00:00:00Z",
+      "min_app_version": "4.5.0"
     }
   ]
 }
