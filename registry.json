@@ -24,7 +24,7 @@
       "id": "amazon",
       "name": "amazon",
       "display_name": "Amazon Music",
-      "version": "2.1.1",
+      "version": "2.1.2",
       "description": "Amazon Music metadata & download provider for SpotiFLAC. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless and Dolby Atmos audio.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/amzn.spotiflac-ext",
       "category": "download",
@@ -157,7 +157,7 @@
       "id": "tidal-web",
       "name": "tidal-web",
       "display_name": "Tidal",
-      "version": "1.0.1",
+      "version": "1.0.4",
       "description": "TIDAL metadata and search provider for SpotiFLAC Mobile using TIDAL public web endpoints.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/tidal-web.spotiflac-ext",
       "category": "download",
@@ -169,7 +169,7 @@
         "search"
       ],
       "downloads": 0,
-      "updated_at": "2026-05-06T00:00:00Z",
+      "updated_at": "2026-05-15T00:00:00Z",
       "min_app_version": "4.5.0"
     }
   ]
