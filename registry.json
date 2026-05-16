@@ -77,13 +77,13 @@
       "min_app_version": "4.3.0"
     },
     {
-      "id": "ytm-spotiflac",
-      "name": "ytm-spotiflac",
-      "display_name": "YouTube Music",
+      "id": "ytmusic-spotiflac",
+      "name": "ytmusic",
+      "display_name": "YT Music",
       "version": "2.3.8",
       "description": "YouTube Music metadata & download provider for SpotiFLAC Mobile. Search tracks, albums, playlists on YouTube Music.",
-      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/ytm-spotiflac.spotiflac-ext",
-      "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/ytm-spotiflac.jpg",
+      "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/ytmusic.spotiflac-ext",
+      "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/ytmusic.jpg",
       "category": "download",
       "tags": [
         "youtube",
@@ -104,7 +104,7 @@
       "version": "1.1.4",
       "description": "Deezer metadata and download provider for SpotiFLAC Mobile.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/deezer.spotiflac-ext",
-      "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/deezer.spotiflac.jpg",
+      "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/deezer.jpg",
       "category": "download",
       "tags": [
         "deezer",
@@ -158,9 +158,10 @@
       "id": "tidal-web",
       "name": "tidal-web",
       "display_name": "Tidal",
-      "version": "1.0.4",
+      "version": "1.0.5",
       "description": "TIDAL metadata and search provider for SpotiFLAC Mobile using TIDAL public web endpoints.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/tidal-web.spotiflac-ext",
+      "icon_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/icons/tidal-web.jpg",
       "category": "download",
       "tags": [
         "tidal",
