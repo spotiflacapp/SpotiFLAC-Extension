@@ -1,0 +1,14 @@
+{
+  "id": "goodluck-dark-visualizer",
+  "name": "Dark Visualizer",
+  "description": "A dark-themed visualizer extension by Goodluck",
+  "version": "1.0.0",
+  "author": "Goodluck",
+  "icon": "SpotiFLAC.png",
+  "capabilities": {
+    "metadataProvider": false,
+    "downloadProvider": false,
+    "lyricsProvider": false,
+    "utilityFunctions": false
+  }
+}
