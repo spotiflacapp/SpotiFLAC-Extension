@@ -171,6 +171,13 @@
       "downloads": 0,
       "updated_at": "2026-05-31T00:00:00Z",
       "min_app_version": "4.5.0"
+    },
+    {
+  "id": "goodluck-dark-visualizer",
+  "name": "Dark Visualizer",
+  "description": "A dark-themed visualizer extension by Goodluck.",
+  "file": "extensions/Goodluck Lyrics.spotiflac-ext",
+  "iconUrl": "https://raw.githubusercontent.com/LuckyK-Bit/SpotiFLAC-Extension/refs/heads/main/icons/SpotiFLAC.png"
     }
   ]
 }
