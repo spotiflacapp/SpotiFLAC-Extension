@@ -171,6 +171,25 @@
       "downloads": 0,
       "updated_at": "2026-05-31T00:00:00Z",
       "min_app_version": "4.5.0"
-    }
+    }, 
+    {
+    "id": "apple-musc",
+    "name": "apple-musc",
+    "display_name": "Apple Music",
+    "version": "1.0.0",
+    "description": "Apple Music metadata and download provider for SpotiFLAC Mobile.",
+    "download_url": "https://githubusercontent.com",
+    "category": "download",
+    "tags": [
+      "apple",
+      "download",
+      "lossless",
+      "metadata",
+      "search"
+    ],
+    "downloads": 0,
+    "updated_at": "2026-06-06T00:00:00Z",
+    "min_app_version": "4.5.0"
+  }
   ]
 }
