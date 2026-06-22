@@ -170,6 +170,24 @@
       "downloads": 0,
       "updated_at": "2026-06-14T00:00:00Z",
       "min_app_version": "4.5.0"
-    }
+    {
+     "id": "raghav-music",
+     "name": "raghav-music",
+     "display_name": "Raghav Music",
+     "version": "1.0.0",
+     "description": "Raghav Music provider for SpotiFLAC.",
+     "download_url": "https://raw.githubusercontent.com/suraj2779/SpotiFLAC-Extension/main/extensions/myextension.spotiflac-ext",
+     "icon_url": "https://raw.githubusercontent.com/suraj2779/SpotiFLAC-Extension/main/icons/Icon_Bird_512x512.png",
+     "category": "download",
+     "tags": [
+       "music",
+       "download",
+       "metadata",
+       "search"
+  ],
+  "downloads": 0,
+  "updated_at": "2026-06-22T00:00:00Z",
+  "min_app_version": "4.5.0"
+    }}
   ]
 }
