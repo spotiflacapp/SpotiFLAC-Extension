@@ -9,6 +9,7 @@
       "version": "1.9.12",
       "description": "Fetch Spotify metadata via web API. Supports personalized playlists like Daily Mix, Discover Weekly, and more. Includes Home Feed explore and metadata enrichment via Spotify native ISRC plus Deezer.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/spotify-web.spotiflac-ext",
+      "icon_url": "https://raw.githubusercontent.com/dj-migz-dev/SpotiFLAC-Extension/main/icons/softify.jpg",
       "category": "integration",
       "tags": [
         "spotify",
