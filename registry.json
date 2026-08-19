@@ -180,5 +180,14 @@
       "updated_at": "2026-08-11T00:00:00Z",
       "min_app_version": "4.7.0"
     }
+    {
+    "id": "jiosaavn",
+    "name": "JioSaavn",
+    "description": "Adds JioSaavn as a music source for SpotiFLAC, enabling search and stream resolution with metadata (up to 320 kbps).",
+    "version": "1.0.0",
+    "author": "Dishaan23-otc",
+    "downloadUrl": "https://raw.githubusercontent.com/Dishaan23-otc/SpotiFLAC-Extension/add-jiosaavn/extensions/jiosaavn.spotiflac-ext",
+    "iconUrl": "https://raw.githubusercontent.com/Dishaan23-otc/SpotiFLAC-Extension/add-jiosaavn/icons/jiosaavn.png"
+    }
   ]
 }
