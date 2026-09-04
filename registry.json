@@ -105,10 +105,10 @@
       "id": "deezer",
       "name": "deezer",
       "display_name": "Deezer",
-      "version": "1.3.4",
-      "description": "Deezer metadata and lossless download provider with complete release, disc, barcode, credits, explicit, genre, rights, link, and original artwork metadata.",
+      "version": "1.3.5",
+      "description": "Deezer metadata and lossless download provider with complete release, disc, barcode, credits, explicit, genre, rights, link, and high-resolution artwork metadata.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/deezer.sflx",
-      "sha256": "7f876e7034ece4c18e69b4330a8d8be8a1e4b60d0afe15b4b47c95db6340eba5",
+      "sha256": "582ea3d122d6d6b48023317a745a2497952a05ea960cc08155850ade3d74fb79",
       "category": "download",
       "tags": [
         "deezer",
@@ -118,7 +118,7 @@
         "search"
       ],
       "downloads": 0,
-      "updated_at": "2026-09-03T00:00:00Z",
+      "updated_at": "2026-09-04T00:00:00Z",
       "min_app_version": "4.9.1"
     },
     {
