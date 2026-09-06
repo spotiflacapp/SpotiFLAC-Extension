@@ -1,5 +1,5 @@
 // Amazon Music Metadata & Download Provider for SpotiFLAC
-// v2.3.5 - Resolves regional links and track IDs through the canonical catalog.
+// v2.3.6 - Recovers regional ASINs retained by prepared download retries.
 // Uses reverse-engineered Amazon Music web API (skill.music.a2z.com).
 
 var CONFIG = {
@@ -230,6 +230,12 @@ function extractResolvedTrackASIN(rawURL) {
     }
   } catch (e) {}
   return null;
+}
+
+function resolvedAmazonMetadataASIN(metadata) {
+  if (!metadata || metadata.provider_id !== "amazon") return null;
+  var asin = normalizeASIN(metadata.id);
+  return asin && extractResolvedTrackASIN(metadata.external_urls || metadata.external_url) === asin ? asin : null;
 }
 
 function acceptResolvedAmazonTrackURL(candidate, source) {
@@ -2314,6 +2320,14 @@ function getTrack(trackId) {
   return handled && handled.track ? handled.track : null;
 }
 
+function getCanonicalCatalogTrack(trackId) {
+  // One direct lookup keeps 404 recovery out of metadata search/retry loops.
+  var result = callDisplayCatalogTrack(trackId, createAmazonContext(CONFIG.musicBaseURL), true);
+  if (!result) return null;
+  var track = parseTrackFromResponse(result.data, result.rawText, trackId);
+  return formatAmazonTrackMetadata(track, null, 0);
+}
+
 function handleAlbumUrl(albumId) {
   var context = getResourceContext("album", albumId, null);
   L("info", "[Amazon] handleAlbumUrl:", albumId);
@@ -3762,7 +3776,7 @@ function completeGrant() {
 
 registerExtension({
   initialize: function() {
-    L("info", "[Amazon] Extension v2.3.5 init");
+    L("info", "[Amazon] Extension v2.3.6 init");
     initSession();
     return true;
   },
@@ -3872,31 +3886,56 @@ registerExtension({
       }
     }
 
-    if (webMetadata && webMetadata.provider_id === "amazon") {
-      var metadataASIN = normalizeASIN(webMetadata.id);
-      if (metadataASIN && extractResolvedTrackASIN(webMetadata.external_urls || webMetadata.external_url) === metadataASIN) {
-        asin = metadataASIN;
-      }
-    }
+    var metadataASIN = resolvedAmazonMetadataASIN(webMetadata);
+    if (metadataASIN) asin = metadataASIN;
 
     var codec = qualityToCodec(quality);
     L("info", "[Amazon] Downloading ASIN:", asin, "codec:", codec);
 
     var apiResult;
     var operation = {};
+    var catalogChecked = false;
+    var requestMedia = function() {
+      try {
+        return callZarzMedia(asin, codec, operation);
+      } catch (error) {
+        var code = String(error && error.code || "").toUpperCase();
+        if (catalogChecked || Number(error && error.statusCode || 0) !== 404 ||
+            error.needsVerification || error.retryable === true ||
+            (code && !/^(TRACK_NOT_FOUND|TRACK_UNAVAILABLE|TRACK_NOT_AVAILABLE)$/.test(code))) throw error;
+
+        // Queue retries can carry metadata created before regional IDs were
+        // resolved. Refresh only after a catalog 404 and only retry a new ID.
+        catalogChecked = true;
+        if (utils && typeof utils.isDownloadCancelled === "function" && utils.isDownloadCancelled()) throw amazonCancelledError();
+        requireAmazonResolutionBudget(0, 0);
+        var resolvedMetadata = null;
+        try {
+          resolvedMetadata = getCanonicalCatalogTrack(asin);
+        } catch (metadataError) {
+          L("warn", "[Amazon] Catalog lookup after 404 failed:", String(metadataError));
+        }
+        var resolvedASIN = resolvedAmazonMetadataASIN(resolvedMetadata);
+        if (!resolvedASIN || resolvedASIN === asin) throw error;
+
+        L("info", "[Amazon] Retrying resolved catalog ASIN after 404:", asin, "->", resolvedASIN);
+        asin = resolvedASIN;
+        webMetadata = resolvedMetadata;
+        operation = {};
+        if (utils && typeof utils.isDownloadCancelled === "function" && utils.isDownloadCancelled()) throw amazonCancelledError();
+        requireAmazonResolutionBudget(0, 0);
+        return callZarzMedia(asin, codec, operation);
+      }
+    };
     try {
       try {
-        apiResult = fetchWithRetry(function() {
-          return callZarzMedia(asin, codec, operation);
-        }, true);
+        apiResult = fetchWithRetry(requestMedia, true);
       } catch (codecError) {
         if (codec === "flac" || !isAmazonUnavailable(codecError)) throw codecError;
         L("info", "[Amazon] Codec", codec, "unavailable for ASIN:", asin, "— falling back to FLAC");
         codec = "flac";
         operation = {};
-        apiResult = fetchWithRetry(function() {
-          return callZarzMedia(asin, codec, operation);
-        }, true);
+        apiResult = fetchWithRetry(requestMedia, true);
       }
     } catch (apiError) {
       var message = String(apiError && apiError.message || apiError);
