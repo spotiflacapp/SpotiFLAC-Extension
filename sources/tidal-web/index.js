@@ -2391,8 +2391,29 @@ function checkAvailability(isrc, trackName, artistName, options) {
       };
     }
 
-    var tracks = searchOne(query, "track", 8);
-    var best = selectBestSearchTrack(tracks, isrc, trackName, artistName, expectedDurationMs);
+    var queries = [query];
+    var titleQuery = String(trackName || "").trim();
+    var normalizedTitleQuery = normalizeTrackIdentityTitle(titleQuery);
+    [titleQuery, normalizedTitleQuery].forEach(function(candidateQuery) {
+      if (candidateQuery && queries.indexOf(candidateQuery) < 0) {
+        queries.push(candidateQuery);
+      }
+    });
+
+    var best = null;
+    for (var queryIndex = 0; queryIndex < queries.length; queryIndex++) {
+      if (utils && typeof utils.isDownloadCancelled === "function" && utils.isDownloadCancelled()) {
+        throw new Error("download cancelled");
+      }
+      var tracks = searchOne(queries[queryIndex], "track", 8);
+      // Simplify only the search query. Keep the original recording identity
+      // for validation so another mix or artist cannot qualify by accident.
+      best = selectBestSearchTrack(tracks, isrc, trackName, artistName, expectedDurationMs);
+      if (best && best.id) break;
+      if (queryIndex + 1 < queries.length) {
+        log.info("[TidalWeb] No verified match; retrying with a simpler track query");
+      }
+    }
     if (!best || !best.id) {
       return {
         available: false,

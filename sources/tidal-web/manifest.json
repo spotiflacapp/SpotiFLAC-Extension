@@ -1,7 +1,7 @@
 {
   "name": "tidal-web",
   "displayName": "Tidal",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "TIDAL metadata and search provider for SpotiFLAC Mobile using TIDAL public web endpoints.",
   "homepage": "https://github.com/zarzet/SpotiFLAC-Mobile",
   "type": [
