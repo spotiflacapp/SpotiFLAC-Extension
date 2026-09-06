@@ -16,6 +16,27 @@
 - Clear description of what extension does
 - Working download URL and icon URL
 
+## Developing the bundled providers
+
+Amazon, Tidal, and Qobuz have reviewable source in `sources/<provider>/` and
+offline regression tests in `tests/`. Edit the source, bump its manifest
+version, and run:
+
+```sh
+node --test tests/*.test.cjs
+python3 scripts/build_packages.py
+python3 scripts/build_packages.py --check
+```
+
+The tests use Node.js 22 or newer and mock provider responses; they do not
+contact music services. The Python 3 script creates reproducible `.sflx`
+archives and updates their versions and SHA-256 digests in `registry.json`.
+Pass provider directory names to rebuild a subset, for example
+`python3 scripts/build_packages.py amazon tidal-web`.
+
+Commit source, tests, packages, and registry changes together. Other providers
+remain package-only until their source is added to this layout.
+
 ## Review Process
 
 All submissions are reviewed before being added to the store.
