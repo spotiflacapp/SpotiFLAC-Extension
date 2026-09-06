@@ -1,0 +1,142 @@
+{
+  "name": "qobuz-web",
+  "displayName": "Qobuz",
+  "version": "1.2.11",
+  "description": "Qobuz metadata and download provider for SpotiFLAC Mobile with resilient album search and track recovery, complete release metadata, credits, multi-disc totals, and original artwork.",
+  "homepage": "https://github.com/zarzet/SpotiFLAC-Mobile",
+  "type": [
+    "metadata_provider",
+    "download_provider"
+  ],
+  "minAppVersion": "4.9.1",
+  "skipMetadataEnrichment": true,
+  "requiredRuntimeFeatures": [
+    "signedSession@3",
+    "sessionGrant@1",
+    "preparedContext@1"
+  ],
+  "signedSession": {
+    "namespace": "zarz-v2",
+    "baseUrl": "https://api.zarz.moe/v2",
+    "appVersion": "qobuz-web@1.2.11",
+    "platform": "extension",
+    "callbackUrl": "spotiflac://session-grant",
+    "schemeLabel": "ZARZ-HMAC-V1",
+    "headerPrefix": "X-Zarz-",
+    "timeWindowSeconds": 300,
+    "endpoints": {
+      "bootstrap": "/bootstrap",
+      "challenge": "/challenge",
+      "exchange": "/session/exchange",
+      "refresh": "/session/refresh"
+    }
+  },
+  "permissions": {
+    "network": [
+      "api.zarz.moe",
+      "www.qobuz.com",
+      "qobuz.com",
+      "play.qobuz.com",
+      "open.qobuz.com",
+      "static.qobuz.com",
+      "streaming-qobuz-std.akamaized.net"
+    ],
+    "storage": true,
+    "file": true
+  },
+  "qualityOptions": [
+    {
+      "id": "HI_RES_LOSSLESS",
+      "label": "24-Bit Max",
+      "description": "Attempt the highest Qobuz hi-res quality first",
+      "kind": "lossless"
+    },
+    {
+      "id": "HI_RES",
+      "label": "24-Bit",
+      "description": "Prefer 24-bit Qobuz quality",
+      "kind": "lossless"
+    },
+    {
+      "id": "LOSSLESS",
+      "label": "Lossless",
+      "description": "Fallback to standard Qobuz lossless quality",
+      "kind": "lossless"
+    }
+  ],
+  "capabilities": {
+    "downloadFallbackTier": "lossless",
+    "networkTimeoutSeconds": 15,
+    "replacesBuiltInProviders": [
+      "qobuz"
+    ],
+    "shareUrlTemplates": {
+      "track": "https://open.qobuz.com/track/{id}",
+      "album": "https://play.qobuz.com/album/{id}",
+      "artist": "https://play.qobuz.com/artist/{id}",
+      "playlist": "https://open.qobuz.com/playlist/{id}"
+    }
+  },
+  "serviceHealth": [
+    {
+      "id": "zarz-api",
+      "label": "Zarz API",
+      "url": "https://api.zarz.moe/v1/health",
+      "method": "GET",
+      "serviceKey": "qobuz",
+      "timeoutMs": 4000,
+      "cacheTtlSeconds": 60,
+      "required": true
+    }
+  ],
+  "searchBehavior": {
+    "enabled": true,
+    "primary": false,
+    "placeholder": "Search Qobuz...",
+    "thumbnailRatio": "square",
+    "filters": [
+      {
+        "id": "track",
+        "label": "Songs",
+        "icon": "music"
+      },
+      {
+        "id": "album",
+        "label": "Albums",
+        "icon": "album"
+      },
+      {
+        "id": "artist",
+        "label": "Artists",
+        "icon": "artist"
+      }
+    ]
+  },
+  "urlHandler": {
+    "enabled": true,
+    "patterns": [
+      "qobuz.com",
+      "www.qobuz.com",
+      "play.qobuz.com",
+      "open.qobuz.com",
+      "qobuzapp://",
+      "qobuz:"
+    ]
+  },
+  "settings": [
+    {
+      "key": "appId",
+      "label": "Qobuz App ID",
+      "type": "string",
+      "default": "798273057",
+      "description": "App ID sent to the primary metadata API."
+    },
+    {
+      "key": "countryCode",
+      "label": "Country Code",
+      "type": "string",
+      "default": "US",
+      "description": "Country code used for provider requests that require it."
+    }
+  ]
+}
