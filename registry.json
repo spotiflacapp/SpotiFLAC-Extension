@@ -125,10 +125,10 @@
       "id": "qobuz-web",
       "name": "qobuz-web",
       "display_name": "Qobuz",
-      "version": "1.2.12",
+      "version": "1.2.13",
       "description": "Qobuz metadata and download provider for SpotiFLAC Mobile with resilient album search and track recovery, complete release metadata, credits, multi-disc totals, and original artwork.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/qobuz-web.sflx",
-      "sha256": "7137e3be3ab19ec4d865c7c4fe95d4d988daf49287fd63e75b387d0607321bab",
+      "sha256": "58f587876a17931f34e48a8caec2e4fba7222a2f7ff86bc490688a9e2e4127f9",
       "category": "download",
       "tags": [
         "qobuz",

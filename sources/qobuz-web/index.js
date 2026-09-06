@@ -2381,6 +2381,7 @@ function applyTrackMetadataToDownloadResult(result, track) {
   track = track || {};
   result.title = track.name || "";
   result.artist = track.artists || "";
+  result.duration_ms = Number(track.duration_ms || 0);
   result.album = track.album_name || "";
   result.album_artist = track.album_artist || "";
   result.track_number = Number(track.track_number || 0);

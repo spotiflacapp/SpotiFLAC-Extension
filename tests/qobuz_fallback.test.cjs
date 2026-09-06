@@ -21,6 +21,15 @@ function sources(c, api, album = () => [], store = () => []) {
   c.searchTracksViaStore = store;
 }
 
+test('download metadata includes duration for host matching across release editions', () => {
+  const c = runtime();
+  const result = c.applyTrackMetadataToDownloadResult({ success: true }, {
+    name: 'Signal', artists: 'Composer, Singer', album_name: 'Compilation', duration_ms: 305000,
+  });
+  assert.equal(result.duration_ms, 305000);
+  assert.equal(c.applyTrackMetadataToDownloadResult({}, {}).duration_ms, 0);
+});
+
 test('exact ISRC outranks an earlier valid name match and still enforces duration', () => {
   const c = runtime();
   const name = track('1', { isrc: 'different', maximum_bit_depth: 24 });
