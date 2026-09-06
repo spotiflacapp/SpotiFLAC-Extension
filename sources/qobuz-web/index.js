@@ -903,17 +903,17 @@ function normalizeSearchText(value) {
 }
 
 function splitArtists(value) {
-  var normalized = normalizeSearchText(value)
+  var normalized = String(value || "").toLowerCase()
     .replace(/\bfeat\b/g, "|")
     .replace(/\bfeaturing\b/g, "|")
     .replace(/\bft\b/g, "|")
     .replace(/\band\b/g, "|")
-    .replace(/,/g, "|")
+    .replace(/[,&;]/g, "|")
     .replace(/\bx\b/g, "|");
   var parts = normalized.split("|");
   var results = [];
   for (var i = 0; i < parts.length; i++) {
-    var part = String(parts[i] || "").trim();
+    var part = normalizeSearchText(parts[i]);
     if (part) {
       results.push(part);
     }
@@ -993,6 +993,16 @@ function artistNamesMatch(expected, found) {
   return false;
 }
 
+function trackTitlesMatch(expected, found) {
+  var a = normalizeLooseTitle(expected);
+  var b = normalizeLooseTitle(found);
+  if (a && a === b) return true;
+  // Version words identify recordings; punctuation around them does not.
+  var version = /\b(?:mix|remix|live|acoustic|demo|instrumental|karaoke|edit|extended|slowed|sped)\b/;
+  if (version.test(a) || version.test(b)) return false;
+  return titlesMatch(expected, found);
+}
+
 function trackDurationMs(track) {
   var durationMs = Number(track && track.duration_ms || 0);
   if (durationMs > 0) return durationMs;
@@ -1018,7 +1028,7 @@ function qobuzTrackMatchesRequest(track, isrc, trackName, artistName, expectedDu
   if (!exactISRCMatch) {
     // An ISRC-only request must never accept an unrelated search hit.
     if (expectedISRC && !String(trackName || "").trim()) return false;
-    if (trackName && !titlesMatch(trackName, track.title || trackDisplayTitle(track))) {
+    if (trackName && !trackTitlesMatch(trackName, trackDisplayTitle(track))) {
       return false;
     }
     if (artistName && !artistNamesMatch(artistName, trackArtistName(track))) {
@@ -2225,7 +2235,7 @@ function searchTracksWithFallback(query, limit, selectMatch) {
   return [];
 }
 
-function findVerifiedSearchTrack(isrc, trackName, artistName, expectedDurationMs) {
+function findVerifiedSearchTrack(isrc, trackName, artistName, expectedDurationMs, albumName) {
   var queries = [];
   var seen = {};
   uniquePush(queries, (String(trackName || "") + " " + String(artistName || "")).trim(), seen);
@@ -2246,6 +2256,31 @@ function findVerifiedSearchTrack(isrc, trackName, artistName, expectedDurationMs
       if (isVerificationRequiredError(e) || ensureNotCancelled() ||
           String(e && e.message || e).toLowerCase().indexOf("cancelled") >= 0) throw e;
       log.warn("[QobuzWeb] Search query failed: " + (e && e.message || e));
+    }
+  }
+
+  // Track search can omit a recording that is present in its album listing.
+  // Search at most three albums and validate every candidate against the
+  // original request, including the version label and duration.
+  var albumQuery = String(albumName || "").trim();
+  if (albumQuery) {
+    if (ensureNotCancelled()) throw new Error("download cancelled");
+    try {
+      var albumKey = "source-albums:" + albumQuery.toLowerCase();
+      var albums = metadataCacheGet(albumKey);
+      if (!albums) {
+        albums = searchAlbumsViaAPI(albumQuery, 3) || [];
+        metadataCacheSet(albumKey, albums, albums.length ? CONFIG.searchCacheTtlMs : CONFIG.negativeCacheTtlMs);
+      }
+      var candidates = selectTracksFromAlbumSearch(trackName, albums.slice(0, 3), 0);
+      best = selectBestSearchTrack(candidates, isrc, trackName, artistName, expectedDurationMs);
+      if (best) {
+        log.info("[QobuzWeb] Recovered track from source album metadata: " + best.id);
+        return best;
+      }
+    } catch (albumError) {
+      if (isVerificationRequiredError(albumError) || ensureNotCancelled()) throw albumError;
+      log.warn("[QobuzWeb] Source album search failed: " + (albumError && albumError.message || albumError));
     }
   }
   return null;
@@ -2744,7 +2779,8 @@ function checkAvailability(isrc, trackName, artistName, options) {
       };
     }
 
-    var best = findVerifiedSearchTrack(isrc, trackName, artistName, expectedDurationMs);
+    var best = findVerifiedSearchTrack(isrc, trackName, artistName, expectedDurationMs,
+      options.track && options.track.album_name);
     if (!best || !best.id) {
       return {
         available: false,

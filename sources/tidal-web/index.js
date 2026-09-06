@@ -589,17 +589,17 @@ function cleanTitle(value) {
 }
 
 function splitArtists(value) {
-  var normalized = normalizeSearchText(value)
+  var normalized = String(value || "").toLowerCase()
     .replace(/\bfeat\b/g, "|")
     .replace(/\bfeaturing\b/g, "|")
     .replace(/\bft\b/g, "|")
     .replace(/\band\b/g, "|")
-    .replace(/,/g, "|")
+    .replace(/[,&;]/g, "|")
     .replace(/\bx\b/g, "|");
   var parts = normalized.split("|");
   var results = [];
   for (var i = 0; i < parts.length; i++) {
-    var part = String(parts[i] || "").trim();
+    var part = normalizeSearchText(parts[i]);
     if (part) results.push(part);
   }
   return results;
@@ -692,6 +692,16 @@ function artistNamesMatch(expected, found) {
   return false;
 }
 
+function trackTitlesMatch(expected, found) {
+  var a = normalizeLooseTitle(expected);
+  var b = normalizeLooseTitle(found);
+  if (a && a === b) return true;
+  // Version words identify recordings; punctuation around them does not.
+  var version = /\b(?:mix|remix|live|acoustic|demo|instrumental|karaoke|edit|extended|slowed|sped)\b/;
+  if (version.test(a) || version.test(b)) return false;
+  return titlesMatch(expected, found);
+}
+
 function trackDurationMs(track) {
   var durationMs = Number(track && track.duration_ms || 0);
   if (durationMs > 0) return durationMs;
@@ -715,7 +725,7 @@ function tidalTrackMatchesRequest(track, isrc, trackName, artistName, expectedDu
   var exactISRCMatch = !!expectedISRC && !!foundISRC && expectedISRC === foundISRC;
 
   if (!exactISRCMatch) {
-    if (trackName && !titlesMatch(trackName, track.name || "")) {
+    if (trackName && !trackTitlesMatch(trackName, track.name || "")) {
       return false;
     }
     if (artistName && !artistNamesMatch(artistName, track.artists || "")) {
@@ -2307,6 +2317,7 @@ function applyTrackMetadataToDownloadResult(result, track) {
   track = track || {};
   result.title = track.name || "";
   result.artist = track.artists || "";
+  result.duration_ms = Number(track.duration_ms || 0);
   result.album = track.album_name || "";
   result.album_artist = track.album_artist || "";
   result.track_number = Number(track.track_number || 0);

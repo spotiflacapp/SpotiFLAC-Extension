@@ -289,3 +289,41 @@ test('title-only alternate keeps artist and duration validation', () => {
     track('2', { isrc: '', duration: 230 }), track('3', { isrc: '' })] : []);
   assert.equal(request(c).track_id, '3');
 });
+
+test('album metadata recovers a final remix omitted from track search', () => {
+  const c = runtime();
+  const queries = [];
+  c.searchTracksViaAPI = () => [];
+  c.searchTracksViaStore = () => [];
+  c.searchAlbumsViaAPI = (query, limit) => {
+    queries.push({ query, limit });
+    return query === 'Original Soundtrack' ? [{ id: 'album-one' }] : [];
+  };
+  c.fetchAlbumRaw = () => ({
+    id: 'album-one', title: 'Original Soundtrack',
+    tracks: { items: [
+      ...Array.from({ length: 10 }, (_, index) => track(String(index + 1), { isrc: '', title: 'Signal', duration: 234 })),
+      track('11', { isrc: '', title: 'Signal', version: 'Remix', duration: 234 }),
+    ] },
+  });
+  const result = c.checkAvailability('', 'Signal - Remix', 'Artist', {
+    duration_ms: 234000, track: { album_name: 'Original Soundtrack' },
+  });
+  assert.equal(result.available, true);
+  assert.equal(result.track_id, '11');
+  assert.equal(result.prepared_context.raw_track.version, 'Remix');
+  assert.equal(queries.at(-1).query, 'Original Soundtrack');
+  assert.ok(queries.at(-1).limit <= 3);
+});
+
+test('album recovery rejects a different recording and propagates verification', () => {
+  const c = runtime();
+  c.searchTracksViaAPI = () => [];
+  c.searchTracksViaStore = () => [];
+  c.searchAlbumsViaAPI = query => query === 'Original Soundtrack' ? [{ id: 'album-one' }] : [];
+  c.fetchAlbumRaw = () => ({ id: 'album-one', tracks: { items: [track('1', { isrc: '', duration: 280 })] } });
+  const options = { duration_ms: 234000, track: { album_name: 'Original Soundtrack' } };
+  assert.equal(c.checkAvailability('', 'Signal - Remix', 'Artist', options).available, false);
+  c.fetchAlbumRaw = () => { throw new Error('VERIFY_REQUIRED'); };
+  assert.throws(() => c.checkAvailability('', 'Signal - Remix', 'Artist', options), /VERIFY_REQUIRED/);
+});

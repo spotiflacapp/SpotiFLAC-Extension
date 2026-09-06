@@ -1,7 +1,7 @@
 {
   "name": "tidal-web",
   "displayName": "Tidal",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "TIDAL metadata and search provider for SpotiFLAC Mobile using TIDAL public web endpoints.",
   "homepage": "https://github.com/zarzet/SpotiFLAC-Mobile",
   "type": [
@@ -17,7 +17,7 @@
   "signedSession": {
     "namespace": "zarz-v2",
     "baseUrl": "https://api.zarz.moe/v2",
-    "appVersion": "tidal-web@1.2.3",
+    "appVersion": "tidal-web@1.2.4",
     "platform": "extension",
     "callbackUrl": "spotiflac://session-grant",
     "schemeLabel": "ZARZ-HMAC-V1",
