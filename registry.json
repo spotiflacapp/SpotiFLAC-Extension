@@ -145,10 +145,10 @@
       "id": "tidal-web",
       "name": "tidal-web",
       "display_name": "Tidal",
-      "version": "1.2.2",
+      "version": "1.2.3",
       "description": "TIDAL metadata, search, and download provider for SpotiFLAC Mobile with complete release, credits, explicit, and disc metadata from TIDAL Web.",
       "download_url": "https://raw.githubusercontent.com/zarzet/SpotiFLAC-Extension/main/extensions/tidal-web.sflx",
-      "sha256": "7f72129e54f7c11f86faaa96d54386e332aaa157b8d2306893d3e1e92392a0a0",
+      "sha256": "2647db131bef1445c1098b27f1c3dca24b941f765954b93f45b785748e2cce1b",
       "category": "download",
       "tags": [
         "tidal",
@@ -158,7 +158,7 @@
         "search"
       ],
       "downloads": 0,
-      "updated_at": "2026-08-29T00:00:00Z",
+      "updated_at": "2026-09-06T00:00:00Z",
       "min_app_version": "4.9.0"
     }
   ]

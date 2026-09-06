@@ -1,0 +1,189 @@
+{
+  "name": "tidal-web",
+  "displayName": "Tidal",
+  "version": "1.2.3",
+  "description": "TIDAL metadata and search provider for SpotiFLAC Mobile using TIDAL public web endpoints.",
+  "homepage": "https://github.com/zarzet/SpotiFLAC-Mobile",
+  "type": [
+    "metadata_provider",
+    "download_provider"
+  ],
+  "minAppVersion": "4.9.0",
+  "requiredRuntimeFeatures": [
+    "signedSession@3",
+    "sessionGrant@1",
+    "downloadSegments@1"
+  ],
+  "signedSession": {
+    "namespace": "zarz-v2",
+    "baseUrl": "https://api.zarz.moe/v2",
+    "appVersion": "tidal-web@1.2.3",
+    "platform": "extension",
+    "callbackUrl": "spotiflac://session-grant",
+    "schemeLabel": "ZARZ-HMAC-V1",
+    "headerPrefix": "X-Zarz-",
+    "timeWindowSeconds": 300,
+    "endpoints": {
+      "bootstrap": "/bootstrap",
+      "challenge": "/challenge",
+      "exchange": "/session/exchange",
+      "refresh": "/session/refresh"
+    }
+  },
+  "permissions": {
+    "network": [
+      "tidal.com",
+      "www.tidal.com",
+      "listen.tidal.com",
+      "resources.tidal.com",
+      "api.zarz.moe",
+      "*.audio.tidal.com",
+      "*.manifest.tidal.com"
+    ],
+    "storage": true,
+    "file": true
+  },
+  "qualityOptions": [
+    {
+      "id": "DOLBY_ATMOS",
+      "label": "Dolby Atmos",
+      "description": "Require Dolby Atmos when supported; otherwise fall back only to the best available FLAC tier",
+      "kind": "spatial"
+    },
+    {
+      "id": "HI_RES_LOSSLESS",
+      "label": "HiRes FLAC",
+      "description": "Prefer 24-bit Hi-Res FLAC; fall back only to Lossless FLAC when the track is limited to 16-bit",
+      "kind": "lossless"
+    },
+    {
+      "id": "LOSSLESS",
+      "label": "Lossless",
+      "description": "Require TIDAL lossless without falling back to a compressed tier",
+      "kind": "lossless"
+    },
+    {
+      "id": "HIGH",
+      "label": "High",
+      "description": "Require TIDAL High without falling back to Low",
+      "kind": "lossy"
+    },
+    {
+      "id": "LOW",
+      "label": "Low",
+      "description": "Require TIDAL Low",
+      "kind": "lossy"
+    }
+  ],
+  "capabilities": {
+    "downloadFallbackTier": "lossless",
+    "networkTimeoutSeconds": 15,
+    "requiresNativeContainerConversion": true,
+    "downloadTransfer": {
+      "maxAttempts": 4,
+      "initialRetryDelayMs": 500,
+      "maxRetryDelayMs": 8000,
+      "resumePolicy": "validated",
+      "persistentCheckpoint": true,
+      "refreshStreamOnStatus": [
+        401,
+        403
+      ],
+      "maxParallelSegments": 4,
+      "maxConcurrentDownloads": 2
+    },
+    "replacesBuiltInProviders": [
+      "tidal"
+    ],
+    "shareUrlTemplates": {
+      "album": "https://tidal.com/browse/album/{id}",
+      "artist": "https://tidal.com/browse/artist/{id}"
+    }
+  },
+  "serviceHealth": [
+    {
+      "id": "zarz-api",
+      "label": "Zarz API",
+      "url": "https://api.zarz.moe/v1/health",
+      "method": "GET",
+      "serviceKey": "tidal",
+      "timeoutMs": 4000,
+      "cacheTtlSeconds": 60,
+      "required": true
+    }
+  ],
+  "searchBehavior": {
+    "enabled": true,
+    "primary": false,
+    "placeholder": "Search TIDAL...",
+    "thumbnailRatio": "square",
+    "filters": [
+      {
+        "id": "track",
+        "label": "Songs",
+        "icon": "music"
+      },
+      {
+        "id": "album",
+        "label": "Albums",
+        "icon": "album"
+      },
+      {
+        "id": "artist",
+        "label": "Artists",
+        "icon": "artist"
+      },
+      {
+        "id": "playlist",
+        "label": "Playlists",
+        "icon": "playlist"
+      }
+    ]
+  },
+  "urlHandler": {
+    "enabled": true,
+    "patterns": [
+      "tidal.com",
+      "www.tidal.com",
+      "listen.tidal.com",
+      "tidal:"
+    ]
+  },
+  "settings": [
+    {
+      "key": "publicToken",
+      "label": "Public Web Token",
+      "type": "string",
+      "default": "49YxDN9a2aFV6RTG",
+      "description": "Public TIDAL web token used for metadata/search requests."
+    },
+    {
+      "key": "countryCode",
+      "label": "Country Code",
+      "type": "string",
+      "default": "US",
+      "description": "Country code sent to TIDAL public endpoints."
+    },
+    {
+      "key": "locale",
+      "label": "Locale",
+      "type": "string",
+      "default": "en_US",
+      "description": "Locale sent to TIDAL public endpoints."
+    },
+    {
+      "key": "deviceType",
+      "label": "Device Type",
+      "type": "string",
+      "default": "BROWSER",
+      "description": "Device type sent to TIDAL public endpoints."
+    },
+    {
+      "key": "downloadApiUrl",
+      "label": "Download API URL",
+      "type": "string",
+      "default": "https://api.zarz.moe/v1/dl/tid2",
+      "description": "Primary TIDAL download API used for strict quality selection and Dolby-to-FLAC fallback."
+    }
+  ]
+}
