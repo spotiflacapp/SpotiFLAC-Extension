@@ -1,5 +1,5 @@
 // Amazon Music Metadata & Download Provider for SpotiFLAC
-// v2.3.4 - Preserves signed retry contracts and bounds stream resolution waits.
+// v2.3.5 - Resolves regional links and track IDs through the canonical catalog.
 // Uses reverse-engineered Amazon Music web API (skill.music.a2z.com).
 
 var CONFIG = {
@@ -160,6 +160,7 @@ function fetchWithRetry(requestFn, preserveErrors) {
 
 var ASIN_REGEX = /^B[0-9A-Z]{9}$/;
 var ASIN_FIND_REGEX = /B[0-9A-Z]{9}/;
+var AMAZON_MUSIC_HOST_REGEX = /^music\.amazon\.(?:com(?:\.(?:br|mx|au))?|co(?:\.(?:uk|jp))?|de|fr|it|es|in|ca)$/;
 
 function normalizeASIN(candidate) {
   if (!candidate || typeof candidate !== "string") return null;
@@ -212,7 +213,7 @@ function extractResolvedTrackASIN(rawURL) {
   if (!rawURL || typeof rawURL !== "string") return null;
   try {
     var parsed = new URL(rawURL.trim());
-    if (parsed.hostname.toLowerCase().indexOf("music.amazon.") === -1) return null;
+    if (!/^https?:$/.test(parsed.protocol) || !AMAZON_MUSIC_HOST_REGEX.test(parsed.hostname.toLowerCase())) return null;
 
     var trackParam = parsed.searchParams.get("trackAsin") ||
       parsed.searchParams.get("trackasin") ||
@@ -246,7 +247,7 @@ function parseAmazonMusicURL(rawURL) {
   try {
     var parsed = new URL(url);
     var host = parsed.hostname.toLowerCase();
-    if (host.indexOf("music.amazon") === -1) return null;
+    if (!/^https?:$/.test(parsed.protocol) || !AMAZON_MUSIC_HOST_REGEX.test(host)) return null;
     var context = createAmazonContext(url);
 
     var path = parsed.pathname.replace(/^\/|\/$/g, "");
@@ -368,6 +369,13 @@ function createAmazonContext(rawURL) {
       var defaultParsed = new URL(base);
       host = defaultParsed.hostname.toLowerCase();
     } catch (e3) {}
+  }
+
+  // Resolve shared regional links in the same catalog used for downloads.
+  // Keep their resource IDs until Amazon returns the corresponding IDs.
+  if (AMAZON_MUSIC_HOST_REGEX.test(host)) {
+    host = "music.amazon.com";
+    base = "https://" + host;
   }
 
   return {
@@ -1308,6 +1316,8 @@ function parseAlbumFromResponse(data, responseStr, albumId) {
       result.year = result.release_date || "";
       result.track_count = Number(schema.numTracks || 0);
       result.album_url = String(schema.url || schema["@id"] || result.album_url);
+      var resolvedAlbumId = normalizeASIN(schemaObjectId(result.album_url, "albums"));
+      if (resolvedAlbumId) result.id = resolvedAlbumId;
       if (schema.byArtist) {
         result.artist = schema.byArtist.name || "";
         result.artist_url = String(schema.byArtist.url || schema.byArtist["@id"] || "");
@@ -1447,7 +1457,7 @@ function parseAlbumFromResponse(data, responseStr, albumId) {
         result.tracks[t].artist = result.artist;
       }
       result.tracks[t].album = result.title;
-      result.tracks[t].album_id = albumId;
+      result.tracks[t].album_id = result.id;
       result.tracks[t].album_artist = result.artist;
       result.tracks[t].artist_id = result.artist_id;
       result.tracks[t].artist_url = result.artist_url || amazonArtistURL(result.artist_id);
@@ -1622,6 +1632,9 @@ function parseTrackFromResponse(data, responseStr, trackId) {
 
   if (!result.album_url && result.album_id) result.album_url = amazonAlbumURL(result.album_id);
   if (!result.artist_url && result.artist_id) result.artist_url = amazonArtistURL(result.artist_id);
+
+  var resolvedTrackId = extractResolvedTrackASIN(result.external_url);
+  if (resolvedTrackId) result.id = resolvedTrackId;
 
   return result;
 }
@@ -2280,6 +2293,10 @@ function handleTrackUrl(parsed) {
     trackInfo.album_id = albumId;
   }
   rememberResourceContext("track", trackId, context);
+  if (trackInfo.id !== trackId) {
+    rememberResourceContext("track", trackInfo.id, context);
+    L("info", "[Amazon] Resolved regional track ASIN:", trackId, "->", trackInfo.id);
+  }
   if (trackInfo.album_id) rememberResourceContext("album", trackInfo.album_id, context);
   L("info", "[Amazon] handleTrackUrl parsed:", trackInfo.title);
   return {
@@ -3745,7 +3762,7 @@ function completeGrant() {
 
 registerExtension({
   initialize: function() {
-    L("info", "[Amazon] Extension v2.3.4 init");
+    L("info", "[Amazon] Extension v2.3.5 init");
     initSession();
     return true;
   },
@@ -3852,6 +3869,13 @@ registerExtension({
         webMetadata = getTrack(asin);
       } catch (metadataError) {
         L("warn", "[Amazon] Web metadata unavailable during download:", String(metadataError));
+      }
+    }
+
+    if (webMetadata && webMetadata.provider_id === "amazon") {
+      var metadataASIN = normalizeASIN(webMetadata.id);
+      if (metadataASIN && extractResolvedTrackASIN(webMetadata.external_urls || webMetadata.external_url) === metadataASIN) {
+        asin = metadataASIN;
       }
     }
 
