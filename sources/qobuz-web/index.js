@@ -573,17 +573,21 @@ function postJSON(url, body, headers) {
   );
 }
 
-function signedJSON(method, path, body, headers) {
-  if (typeof session === "undefined" || !session || typeof session.signedFetch !== "function") {
-    throw new Error("signed session runtime is not available");
-  }
-  var response = session.signedFetch(method, path, body || null, headers || {});
+function throwIfVerificationRequired(response) {
   if (response && response.needsVerification) {
     var verificationError = new Error("VERIFY_REQUIRED");
     verificationError.needsVerification = true;
     verificationError.authUrl = response.auth_url || response.open_auth_url || "";
     throw verificationError;
   }
+}
+
+function signedJSON(method, path, body, headers) {
+  if (typeof session === "undefined" || !session || typeof session.signedFetch !== "function") {
+    throw new Error("signed session runtime is not available");
+  }
+  var response = session.signedFetch(method, path, body || null, headers || {});
+  throwIfVerificationRequired(response);
   if (!response || response.error) {
     var error = response && response.error ? response.error : "signed request failed";
     var signedError = new Error(error);
@@ -1777,6 +1781,7 @@ function fetchTrackRaw(trackID) {
       return metadataCacheSet(cacheKey, primary);
     }
   } catch (e) {
+    if (isVerificationRequiredError(e)) throw e;
     signedError = e;
     log.warn("[QobuzWeb] Signed track metadata unavailable, using public fallback: " + e.message);
   }
@@ -1872,6 +1877,7 @@ function fetchAlbumRaw(albumID) {
   try {
     signed = getMetadataJSON("album/get", { album_id: normalizedID });
   } catch (e) {
+    if (isVerificationRequiredError(e)) throw e;
     signedError = e;
   }
 
@@ -1925,6 +1931,7 @@ function fetchPlaylistPage(playlistID, limit, offset) {
       offset: offset
     });
   } catch (primaryError) {
+    if (isVerificationRequiredError(primaryError)) throw primaryError;
     log.warn("[QobuzWeb] Signed playlist metadata unavailable, using public fallback: " + primaryError.message);
     return getPublicQobuzJSON("playlist/get", {
       playlist_id: normalizedID,
@@ -2527,6 +2534,7 @@ function fetchProviderDownloadInfo(provider, trackID, qualityCode) {
       }, {
         "X-Zarz-Ticket": ticketID
       });
+      throwIfVerificationRequired(response);
 
       if (!response || response.error) {
         var responseError = new Error(response && response.error ? response.error : "request failed");
@@ -2566,6 +2574,7 @@ function fetchProviderDownloadInfo(provider, trackID, qualityCode) {
       info.candidateKey = provider.name + "@" + qualityCode;
       return info;
     } catch (e) {
+      if (isVerificationRequiredError(e)) throw e;
       lastError = e;
       var message = String(e && e.message ? e.message : e).toLowerCase();
       var retryMode = String(e && e.retryMode || "");
@@ -2616,6 +2625,7 @@ function resolveDownloadInfo(trackID, requestedQuality, rejectedCandidates) {
         }
         return info;
       } catch (e) {
+        if (isVerificationRequiredError(e)) throw e;
         var message = e && e.message ? e.message : String(e);
         errors.push(candidateKey + ": " + message);
       }
@@ -2805,6 +2815,7 @@ function download(trackID, quality, outputPath, onProgress, options) {
       try {
         downloadInfo = resolveDownloadInfo(trackID, quality, rejectedDownloadCandidates);
       } catch (resolveError) {
+        if (isVerificationRequiredError(resolveError)) throw resolveError;
         if (previewMessages.length) {
           return {
             success: false,
@@ -2907,7 +2918,7 @@ function download(trackID, quality, outputPath, onProgress, options) {
     return {
       success: false,
       error_message: errorMessage,
-      error_type: errorMessage.indexOf("VERIFY_REQUIRED") >= 0 ? "verification_required" : "runtime_error"
+      error_type: isVerificationRequiredError(e) ? "verification_required" : "runtime_error"
     };
   }
 }
@@ -2976,7 +2987,11 @@ function completeGrant() {
   if (typeof session === "undefined" || !session || typeof session.completeGrant !== "function") {
     return { success: false, error: "signed session runtime is not available" };
   }
-  return session.completeGrant();
+  var result = session.completeGrant();
+  if (result && result.success) {
+    METADATA_CACHE.clear();
+  }
+  return result;
 }
 
 registerExtension({

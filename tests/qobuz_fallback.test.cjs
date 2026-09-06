@@ -99,6 +99,148 @@ test('verification halts fallback search and direct-ID verification propagates',
   assert.throws(() => c.checkAvailability('USAAA0000001', 'Signal', 'Artist', { qobuz_id: '1' }), /VERIFY_REQUIRED/);
 });
 
+test('native signed-session challenges propagate from availability and manual search', () => {
+  const c = runtime();
+  let signedCalls = 0;
+  c.session = {
+    signedFetch() {
+      signedCalls++;
+      return { needsVerification: true, auth_url: 'https://auth.example.test/verify' };
+    },
+  };
+  c.http = { get() { assert.fail('verification must not fall through to public search'); } };
+  assert.throws(() => request(c), /VERIFY_REQUIRED/);
+  assert.throws(() => c.customSearch('Signal', { filter: 'track' }), /VERIFY_REQUIRED/);
+  assert.equal(signedCalls, 2);
+});
+
+test('verification errors are not cached as unavailable after a grant', () => {
+  const c = runtime();
+  let granted = false;
+  let signedCalls = 0;
+  c.session = {
+    signedFetch() {
+      signedCalls++;
+      if (!granted) return { needsVerification: true };
+      return { statusCode: 200, body: JSON.stringify({ tracks: { items: [track('1')] } }) };
+    },
+  };
+  assert.throws(() => request(c), /VERIFY_REQUIRED/);
+  granted = true;
+  assert.equal(request(c).track_id, '1');
+  assert.equal(signedCalls, 2);
+});
+
+test('cached misses do not contact the session while a manual search can request verification', () => {
+  const c = runtime();
+  const originalSources = [c.searchTracksViaAPI, c.searchTracksViaAlbumSearch, c.searchTracksViaStore];
+  sources(c, () => [], () => [], () => []);
+  assert.equal(request(c).available, false);
+  sources(c, ...originalSources);
+  let signedCalls = 0;
+  c.session = {
+    signedFetch() {
+      signedCalls++;
+      return { needsVerification: true };
+    },
+  };
+  assert.equal(request(c).available, false);
+  assert.equal(signedCalls, 0, 'the host must prepare the session before accepting cached availability');
+  assert.throws(() => c.customSearch('Signal', { filter: 'track' }), /VERIFY_REQUIRED/);
+  assert.equal(signedCalls, 1);
+});
+
+for (const method of ['fetchTrackRaw', 'fetchAlbumRaw', 'fetchPlaylistPage']) {
+  test(`${method} preserves native verification instead of caching public fallback metadata`, () => {
+    const c = runtime();
+    let publicCalls = 0;
+    c.session = { signedFetch: () => ({ needsVerification: true }) };
+    c.getPublicQobuzJSON = () => {
+      publicCalls++;
+      return { ...track('1'), tracks_count: 1, tracks: { items: [track('1')] } };
+    };
+    c.ensureAlbumUPC = album => album;
+    c.hydrateGenreHierarchy = () => {};
+    assert.throws(() => c[method]('1', 10, 0), /VERIFY_REQUIRED/);
+    assert.equal(publicCalls, 0);
+    assert.equal(c.METADATA_CACHE.size, 0);
+  });
+
+  test(`${method} still uses public metadata for ordinary API failures`, () => {
+    const c = runtime();
+    let publicCalls = 0;
+    c.getMetadataJSON = () => { throw new Error('HTTP 503'); };
+    c.getPublicQobuzJSON = () => {
+      publicCalls++;
+      return { ...track('1'), tracks_count: 1, tracks: { items: [track('1')] } };
+    };
+    c.ensureAlbumUPC = album => album;
+    c.hydrateGenreHierarchy = () => {};
+    assert.equal(c[method]('1', 10, 0).id, '1');
+    assert.equal(publicCalls, 1);
+  });
+}
+
+test('only a successful grant clears search misses before retrying availability', () => {
+  const c = runtime();
+  const originalSources = [c.searchTracksViaAPI, c.searchTracksViaAlbumSearch, c.searchTracksViaStore];
+  sources(c, () => [], () => [], () => []);
+  assert.equal(request(c).available, false);
+  sources(c, ...originalSources);
+  let granted = false;
+  let signedCalls = 0;
+  c.session = {
+    completeGrant: () => ({ success: granted }),
+    signedFetch() {
+      signedCalls++;
+      return { statusCode: 200, body: JSON.stringify({ tracks: { items: [track('1')] } }) };
+    },
+  };
+  assert.equal(c.completeGrant().success, false);
+  assert.equal(request(c).available, false);
+  assert.equal(signedCalls, 0);
+  granted = true;
+  assert.equal(c.completeGrant().success, true);
+  assert.equal(request(c).track_id, '1');
+  assert.equal(signedCalls, 1);
+});
+
+test('download resolution stops at a verification challenge without trying other qualities', () => {
+  const c = runtime();
+  let calls = 0;
+  c.fetchProviderDownloadInfo = () => { calls++; throw new Error('VERIFY_REQUIRED'); };
+  assert.throws(() => c.resolveDownloadInfo('1', 'HI_RES_LOSSLESS'), /VERIFY_REQUIRED/);
+  assert.equal(calls, 1);
+});
+
+test('the native download response can request verification without an error string', () => {
+  const c = runtime();
+  let calls = 0;
+  c.signedTicket = () => 'fixture-ticket';
+  c.session = { signedFetch() { calls++; return { needsVerification: true }; } };
+  assert.throws(() => c.resolveDownloadInfo('1', 'HI_RES_LOSSLESS'), /VERIFY_REQUIRED/);
+  assert.equal(calls, 1);
+});
+
+test('a challenge after a preview download retains its verification error type', () => {
+  const c = runtime();
+  let resolutions = 0;
+  c.gobackend = {};
+  c.resolveDownloadInfo = () => {
+    if (++resolutions === 2) throw new Error('VERIFY_REQUIRED');
+    return { directURL: 'https://audio.example.test/preview.flac', candidateKey: 'fixture@27' };
+  };
+  c.downloadDirectFile = () => ({ success: true, path: '/preview.flac' });
+  c.readDownloadedAudioQuality = () => ({ duration: 30 });
+  c.deleteQuietly = () => {};
+  const result = c.download('1', 'HI_RES_LOSSLESS', '/song.flac', null, {
+    preparedContext: { host_track: { name: 'Signal', artists: 'Artist', duration_ms: 180000 } },
+  });
+  assert.equal(result.success, false);
+  assert.equal(result.error_type, 'verification_required');
+  assert.equal(resolutions, 2);
+});
+
 test('cancellation stops requests before search and between sources', () => {
   const c = runtime();
   let calls = 0;
