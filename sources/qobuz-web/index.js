@@ -993,7 +993,17 @@ function artistNamesMatch(expected, found) {
   return false;
 }
 
+function stripTrackTitleAnnotations(value) {
+  return String(value || "").replace(/[(\[]\s*(?:(?:feat\.?|ft\.?|featuring)\s+[^)\]]+|from\s+["“][^)\]]+["”]\s*)[)\]]/gi, " ");
+}
+
+function normalizeTrackIdentityTitle(value) {
+  return normalizeLooseTitle(stripTrackTitleAnnotations(value));
+}
+
 function trackTitlesMatch(expected, found) {
+  expected = stripTrackTitleAnnotations(expected);
+  found = stripTrackTitleAnnotations(found);
   var a = normalizeLooseTitle(expected);
   var b = normalizeLooseTitle(found);
   if (a && a === b) return true;
@@ -1037,7 +1047,12 @@ function qobuzTrackMatchesRequest(track, isrc, trackName, artistName, expectedDu
   }
 
   if (!durationMatches(expectedDurationMs, trackDurationMs(track))) {
-    return false;
+    // Catalog durations can disagree for the same identified recording.
+    // Actual audio is checked against this provider's duration after transfer.
+    return exactISRCMatch && !!trackName && !!artistName &&
+      normalizeTrackIdentityTitle(trackName) === normalizeTrackIdentityTitle(trackDisplayTitle(track)) &&
+      artistNamesMatch(artistName, trackArtistName(track)) &&
+      !(trackDurationMs(track) <= 35000 && expectedDurationMs > 45000);
   }
 
   return true;
@@ -1080,13 +1095,16 @@ function selectBestSearchTrack(tracks, isrc, trackName, artistName, expectedDura
 
   var normalizedISRC = String(isrc || "").trim().toUpperCase();
   if (normalizedISRC) {
+    var identifiedTrack = null;
     for (var i = 0; i < tracks.length; i++) {
       if (tracks[i] && tracks[i].id &&
           String(tracks[i].isrc || "").trim().toUpperCase() === normalizedISRC &&
           qobuzTrackMatchesRequest(tracks[i], normalizedISRC, trackName, artistName, expectedDurationMs)) {
-        return tracks[i];
+        if (durationMatches(expectedDurationMs, trackDurationMs(tracks[i]))) return tracks[i];
+        if (!identifiedTrack) identifiedTrack = tracks[i];
       }
     }
+    if (identifiedTrack) return identifiedTrack;
   }
 
   if (!String(trackName || "").trim()) {

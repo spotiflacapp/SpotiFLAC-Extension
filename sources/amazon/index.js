@@ -1,5 +1,5 @@
 // Amazon Music Metadata & Download Provider for SpotiFLAC
-// v2.3.7 - Reports catalog resolution decisions for regional download failures.
+// v2.3.8 - Preserves recording ISRCs for cross-catalog matching.
 // Uses reverse-engineered Amazon Music web API (skill.music.a2z.com).
 
 var CONFIG = {
@@ -1446,6 +1446,7 @@ function parseAlbumFromResponse(data, responseStr, albumId) {
       var schemaTrack = schemaTrackForID(albumSchema, result.tracks[t].id);
       if (schemaTrack) {
         if (schemaTrack.name) result.tracks[t].title = schemaTrack.name;
+        if (schemaTrack.isrcCode) result.tracks[t].isrc = String(schemaTrack.isrcCode).trim();
         if (schemaTrack.position) result.tracks[t].track_number = Number(schemaTrack.position);
         if (schemaTrack.duration) {
           result.tracks[t].duration = parseDurationISO(schemaTrack.duration);
@@ -1641,10 +1642,15 @@ function parseTrackFromResponse(data, responseStr, trackId) {
 
   var resolvedTrackId = extractResolvedTrackASIN(result.external_url);
   if (resolvedTrackId) result.id = resolvedTrackId;
-  L("info", "[Amazon] Parsed track identity:", "requested:", trackId,
-    "returned:", result.id, "urlASIN:", resolvedTrackId || "none",
-    "catalog:", (_currentContext && _currentContext.host) || "unknown",
-    "sessionTerritory:", _session.musicTerritory || "unknown");
+  if (schema && extractResolvedTrackASIN(schema.url || schema["@id"]) === result.id) {
+    result.isrc = String(schema.isrcCode || "").trim();
+  }
+  L("info", "[Amazon] Parsed track identity: " + JSON.stringify({
+    requested: trackId, returned: result.id, urlASIN: resolvedTrackId || "none",
+    catalog: (_currentContext && _currentContext.host) || "unknown",
+    sessionTerritory: _session.musicTerritory || "unknown",
+    isrc: result.isrc, durationMs: result.duration_ms
+  }));
 
   return result;
 }
@@ -3783,7 +3789,7 @@ function completeGrant() {
 
 registerExtension({
   initialize: function() {
-    L("info", "[Amazon] Extension v2.3.7 init");
+    L("info", "[Amazon] Extension v2.3.8 init");
     initSession();
     return true;
   },
@@ -3867,7 +3873,7 @@ registerExtension({
   },
 
   download: function(trackID, quality, outputPath, onProgress, options) {
-    L("info", "[Amazon] download called:", trackID, quality, "extension: 2.3.7");
+    L("info", "[Amazon] download called:", trackID, quality, "extension: 2.3.8");
 
     // trackID bisa berupa:
     // - ASIN langsung (dari handleUrl/getAlbum flow, atau checkAvailability)
@@ -3924,10 +3930,11 @@ registerExtension({
         }
         var resolvedASIN = resolvedAmazonMetadataASIN(resolvedMetadata);
         if (!resolvedASIN || resolvedASIN === asin) {
-          L("warn", "[Amazon] Catalog recovery stopped:", "requested:", asin,
-            "returned:", resolvedMetadata && resolvedMetadata.id || "none",
-            "validated:", resolvedASIN || "none",
-            "reason:", resolvedASIN === asin ? "unchanged_asin" : "no_valid_track_identity");
+          L("warn", "[Amazon] Catalog recovery stopped: " + JSON.stringify({
+            requested: asin, returned: resolvedMetadata && resolvedMetadata.id || "none",
+            validated: resolvedASIN || "none",
+            reason: resolvedASIN === asin ? "unchanged_asin" : "no_valid_track_identity"
+          }));
           throw error;
         }
 

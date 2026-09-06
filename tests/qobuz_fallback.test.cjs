@@ -30,13 +30,14 @@ test('download metadata includes duration for host matching across release editi
   assert.equal(c.applyTrackMetadataToDownloadResult({}, {}).duration_ms, 0);
 });
 
-test('exact ISRC outranks an earlier valid name match and still enforces duration', () => {
+test('exact ISRC outranks a name match and prefers a matching catalog duration', () => {
   const c = runtime();
   const name = track('1', { isrc: 'different', maximum_bit_depth: 24 });
   const exact = track('2', { isrc: ' usaaa0000001 ', maximum_bit_depth: 16 });
   const long = track('3', { duration: 210 });
   assert.equal(c.selectBestSearchTrack([name, long, exact], 'USAAA0000001', 'Signal', 'Artist', 180000).id, '2');
-  assert.equal(c.selectBestSearchTrack([long], 'USAAA0000001', 'Signal', 'Artist', 180000), null);
+  assert.equal(c.selectBestSearchTrack([long], 'USAAA0000001', 'Signal', 'Artist', 180000).id, '3');
+  assert.equal(c.selectBestSearchTrack([long], '', 'Signal', 'Artist', 180000), null);
   assert.equal(c.validateDownloadedDuration(180000, 30).valid, false);
   assert.equal(c.validateDownloadedDuration(180000, 191).valid, false);
 });
@@ -53,7 +54,7 @@ test('invalid API candidates allow album and store fallbacks', () => {
   for (const matchSource of ['album', 'store']) {
     const c = runtime();
     const calls = [];
-    sources(c, () => { calls.push('api'); return [track('1', { duration: 240 })]; },
+    sources(c, () => { calls.push('api'); return [track('1', { isrc: '', duration: 240 })]; },
       () => { calls.push('album'); return matchSource === 'album' ? [track('2')] : [track('3', { isrc: '', title: 'Other' })]; },
       () => { calls.push('store'); return [track('4')]; });
     assert.equal(request(c).track_id, matchSource === 'album' ? '2' : '4');
@@ -64,7 +65,7 @@ test('invalid API candidates allow album and store fallbacks', () => {
 test('an ISRC alternate query can match even when a name was supplied', () => {
   const c = runtime();
   const calls = [];
-  sources(c, q => { calls.push(q); return q === 'USAAA0000001' ? [track('2')] : [track('1', { duration: 220 })]; });
+  sources(c, q => { calls.push(q); return q === 'USAAA0000001' ? [track('2')] : [track('1', { isrc: '', duration: 220 })]; });
   assert.equal(request(c).track_id, '2');
   assert.deepEqual(calls, ['Signal Artist', 'USAAA0000001']);
 });
@@ -88,7 +89,7 @@ test('raw cache results are revalidated for each request and shared with normal 
   const c = runtime();
   let apiCalls = 0;
   let albumCalls = 0;
-  sources(c, () => { apiCalls++; return [track('1', { duration: 210 })]; },
+  sources(c, () => { apiCalls++; return [track('1', { isrc: '', duration: 210 })]; },
     () => { albumCalls++; return [track('2')]; });
   assert.equal(c.searchTracksWithFallback('Signal Artist', 8)[0].id, '1');
   assert.equal(request(c).track_id, '2');

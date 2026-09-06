@@ -83,6 +83,33 @@ test('resolved track metadata uses the ASIN from the canonical track URL', () =>
   assert.equal(result.duration_ms, 180000);
 });
 
+test('track enrichment retains the recording ISRC from the requested schema', () => {
+  const { context, extension } = runtime();
+  const response = metadataResponse('MusicRecording', resolvedTrack, 'Signal');
+  const schema = JSON.parse(response.data.methods[0].innerHTML);
+  schema.isrcCode = 'INT130800412';
+  response.data.methods[0].innerHTML = JSON.stringify(schema);
+  response.rawText = JSON.stringify(response.data);
+  context.callShowHome = () => response;
+  const result = extension.enrichTrack({ id: sourceTrack, name: 'Signal', duration_ms: 280000 });
+  assert.equal(result.isrc, 'INT130800412');
+  assert.equal(result.id, resolvedTrack);
+});
+
+test('album parsing retains each track ISRC without copying a different recording', () => {
+  const { context } = runtime();
+  const response = metadataResponse('MusicAlbum', resolvedAlbum, 'Original Album');
+  const schema = JSON.parse(response.data.methods[0].innerHTML);
+  schema.track = [
+    { '@type': 'MusicRecording', '@id': `https://music.amazon.com/tracks/${sourceTrack}`, name: 'Signal (Remix)', isrcCode: 'INT130800416' },
+    { '@type': 'MusicRecording', '@id': `https://music.amazon.com/tracks/${resolvedTrack}`, name: 'Signal', isrcCode: 'INT130800412' },
+  ];
+  response.data.methods[0].innerHTML = JSON.stringify(schema);
+  response.rawText = JSON.stringify(response.data);
+  assert.equal(context.parseAlbumFromResponse(response.data, response.rawText, resolvedAlbum).tracks[0].isrc, 'INT130800412');
+  assert.equal(context.parseTrackFromResponse(response.data, response.rawText, resolvedTrack).isrc, 'INT130800412');
+});
+
 test('album and artist URLs are not accepted as resolved track IDs', () => {
   const { context } = runtime();
   for (const resource of ['albums', 'artists']) {
