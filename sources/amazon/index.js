@@ -1,5 +1,5 @@
 // Amazon Music Metadata & Download Provider for SpotiFLAC
-// v2.3.6 - Recovers regional ASINs retained by prepared download retries.
+// v2.3.7 - Reports catalog resolution decisions for regional download failures.
 // Uses reverse-engineered Amazon Music web API (skill.music.a2z.com).
 
 var CONFIG = {
@@ -1641,6 +1641,10 @@ function parseTrackFromResponse(data, responseStr, trackId) {
 
   var resolvedTrackId = extractResolvedTrackASIN(result.external_url);
   if (resolvedTrackId) result.id = resolvedTrackId;
+  L("info", "[Amazon] Parsed track identity:", "requested:", trackId,
+    "returned:", result.id, "urlASIN:", resolvedTrackId || "none",
+    "catalog:", (_currentContext && _currentContext.host) || "unknown",
+    "sessionTerritory:", _session.musicTerritory || "unknown");
 
   return result;
 }
@@ -2323,7 +2327,10 @@ function getTrack(trackId) {
 function getCanonicalCatalogTrack(trackId) {
   // One direct lookup keeps 404 recovery out of metadata search/retry loops.
   var result = callDisplayCatalogTrack(trackId, createAmazonContext(CONFIG.musicBaseURL), true);
-  if (!result) return null;
+  if (!result) {
+    L("warn", "[Amazon] Catalog lookup returned no metadata for ASIN:", trackId);
+    return null;
+  }
   var track = parseTrackFromResponse(result.data, result.rawText, trackId);
   return formatAmazonTrackMetadata(track, null, 0);
 }
@@ -3776,7 +3783,7 @@ function completeGrant() {
 
 registerExtension({
   initialize: function() {
-    L("info", "[Amazon] Extension v2.3.6 init");
+    L("info", "[Amazon] Extension v2.3.7 init");
     initSession();
     return true;
   },
@@ -3860,7 +3867,7 @@ registerExtension({
   },
 
   download: function(trackID, quality, outputPath, onProgress, options) {
-    L("info", "[Amazon] download called:", trackID, quality);
+    L("info", "[Amazon] download called:", trackID, quality, "extension: 2.3.7");
 
     // trackID bisa berupa:
     // - ASIN langsung (dari handleUrl/getAlbum flow, atau checkAvailability)
@@ -3916,7 +3923,13 @@ registerExtension({
           L("warn", "[Amazon] Catalog lookup after 404 failed:", String(metadataError));
         }
         var resolvedASIN = resolvedAmazonMetadataASIN(resolvedMetadata);
-        if (!resolvedASIN || resolvedASIN === asin) throw error;
+        if (!resolvedASIN || resolvedASIN === asin) {
+          L("warn", "[Amazon] Catalog recovery stopped:", "requested:", asin,
+            "returned:", resolvedMetadata && resolvedMetadata.id || "none",
+            "validated:", resolvedASIN || "none",
+            "reason:", resolvedASIN === asin ? "unchanged_asin" : "no_valid_track_identity");
+          throw error;
+        }
 
         L("info", "[Amazon] Retrying resolved catalog ASIN after 404:", asin, "->", resolvedASIN);
         asin = resolvedASIN;

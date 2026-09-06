@@ -1,7 +1,7 @@
 {
   "name": "amazon",
   "displayName": "Amazon Music",
-  "version": "2.3.6",
+  "version": "2.3.7",
   "description": "Amazon Music metadata & download provider for SpotiFLAC Mobile. Browse tracks, albums, artists, playlists from Amazon Music links and search. Downloads lossless and Dolby Atmos audio.",
   "type": [
     "metadata_provider",
@@ -16,7 +16,7 @@
   "signedSession": {
     "namespace": "zarz-v2",
     "baseUrl": "https://api.zarz.moe/v2",
-    "appVersion": "amzn@2.3.6",
+    "appVersion": "amzn@2.3.7",
     "platform": "extension",
     "callbackUrl": "spotiflac://session-grant",
     "schemeLabel": "ZARZ-HMAC-V1",
