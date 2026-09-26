@@ -1,0 +1,91 @@
+// ==SpotiFLAC-Extension==
+// @id          jiosaavn
+// @name        JioSaavn
+// @version     1.0.0
+// @author      <YOUR_GITHUB_USERNAME>
+// @description Adds JioSaavn as a music source for SpotiFLAC: search the catalogue and resolve the highest-quality stream (up to 320 kbps) with full metadata and artwork. JioSaavn has no lossless tier, so this extension always picks the best available bitrate.
+// @icon        icons/jiosaavn.png
+// @grant       network
+// ==/SpotiFLAC-Extension==
+
+"use strict";
+
+/* Public JioSaavn API bridge (open-source jiosaavn-api).
+   If this instance goes down, swap API_BASE for another public
+   instance or self-host: https://github.com/sumitkolhe/jiosaavn-api */
+const API_BASE = "https://saavn.dev/api";
+
+const QUALITY_RANK = {
+  "16kbps": 1, "32kbps": 2, "64kbps": 3, "96kbps": 4,
+  "128kbps": 5, "192kbps": 6, "320kbps": 7,
+};
+
+/* ----------------------------- helpers ----------------------------- */
+
+async function apiGet(path, params = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const url = `${API_BASE}${path}${qs ? `?${qs}` : ""}`;
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(`[jiosaavn] HTTP ${res.status} -> ${url}`);
+  const json = await res.json();
+  if (json.success === false) {
+    throw new Error(`[jiosaavn] API error: ${json.message || "unknown"}`);
+  }
+  return json.data;
+}
+
+const clean = (s = "") =>
+  s.replace(/&quot;/g, '"')
+   .replace(/&#039;|&apos;/g, "'")
+   .replace(/&amp;/g, "&")
+   .trim();
+
+function bestStream(links = []) {
+  return links
+    .filter((l) => l && l.url)
+    .sort((a, b) => (QUALITY_RANK[a.quality] || 0) - (QUALITY_RANK[b.quality] || 0))
+    .pop() || null;
+}
+
+const bestArtwork = (images = []) =>
+  images.length ? images[images.length - 1].url : null;
+
+function normalize(song) {
+  const stream = bestStream(song.downloadUrl);
+  return {
+    source:      "jiosaavn",
+    id:          song.id,
+    title:       clean(song.name),
+    artists:     ((song.artists || {}).primary || []).map((a) => a.name).join(", "),
+    album:       clean((song.album || {}).name || ""),
+    durationSec: song.duration || 0,
+    artwork:     bestArtwork(song.image),
+    streamUrl:   stream ? stream.url : null,
+    quality:     stream ? stream.quality : null,
+    lossless:    false, // JioSaavn serves AAC/MP3 only
+  };
+}
+
+/* ------------------------- extension API --------------------------- */
+
+async function search(query, limit = 10) {
+  const data = await apiGet("/search/songs", { query, page: 1, limit });
+  return (data.results || []).map(normalize);
+}
+
+async function getTrack(id) {
+  const data = await apiGet(`/songs/${id}`);
+  const song = Array.isArray(data) ? data[0] : data;
+  return song ? normalize(song) : null;
+}
+
+async function getAlbum(id) {
+  const data = await apiGet(`/albums/${id}`);
+  return (data.songs || []).map(normalize);
+}
+
+const extension = { id: "jiosaavn", name: "JioSaavn", version: "1.0.0", search, getTrack, getAlbum };
+
+/* Adapt to whichever module system the SpotiFLAC loader uses: */
+if (typeof module !== "undefined" && module.exports) module.exports = extension;
+else (globalThis.spotiflacExtensions ||= {})[extension.id] = extension;
